@@ -1,3 +1,5 @@
+#version 450 core
+
 /*
  * Copyright (c) 2018-2020 The Forge Interactive Inc.
  * 
@@ -22,33 +24,25 @@
  * under the License.
 */
 
+#extension GL_ARB_separate_shader_objects : enable
 
+layout(location = 0) in vec4 Position;
+layout(location = 1) in vec3 Normal;
+layout(location = 2) in vec3 WindDirection;
+layout(location = 3) in vec2 UV;
 
-cbuffer uniformBlock : register(b0) 
+layout(location = 0) out vec4 outColor;
+
+void main()
 {
-	float4x4 projView;
-	float4x4 invProjView;
-	float3 camPos;
-}
+   	vec3 upperColor = vec3(0.0,0.9,0.1);
+	vec3 lowerColor = vec3(0.0,0.2,0.1);
 
-struct VSInput 
-{
-	float4 Position : POSITION;
-};
+	vec3 sunDirection = normalize(vec3(-1.0, 5.0, -3.0));
 
-struct VSOutput 
-{
-	float4 Position : SV_POSITION;
-	float3 pos : POSITION;
-};
+	float NoL = clamp(dot(Normal, sunDirection), 0.1, 1.0);
 
-VSOutput main(VSInput input)
-{
-	VSOutput result;
-	result.Position = mul(projView, input.Position);
-	result.Position = result.Position.xyww;
+	vec3 mixedColor = mix(lowerColor, upperColor, UV.y);
 
-	result.pos = input.Position;
-	
-	return result;
+     outColor = vec4(mixedColor*NoL, 1.0);
 }

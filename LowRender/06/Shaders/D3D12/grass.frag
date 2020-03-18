@@ -22,12 +22,24 @@
  * under the License.
 */
 
-struct VSOutput
+struct DS_OUTPUT
 {
-	float4 Position : SV_POSITION;
+	float4 Position: SV_Position;
+	float3 Normal: NORMAL;
+	float3 WindDirection: BINORMAL;
+	float2 UV: TEXCOORD;
 };
 
-float4 main(VSOutput input) : SV_TARGET
+float4 main(DS_OUTPUT In) : SV_Target
 {
-	return float4(0.8f, 0.8f, 0.8f, 0.3f);
+	float3 upperColor = float3(0.0,0.9,0.1);
+	float3 lowerColor = float3(0.0,0.2,0.1);
+
+	float3 sunDirection = normalize(float3(-1.0, 5.0, -3.0));
+
+	float NoL = clamp(dot(In.Normal, sunDirection), 0.1, 1.0);
+
+	float3 mixedColor = lerp(lowerColor, upperColor, In.UV.y);
+
+	return float4(mixedColor*NoL, 1.0);
 }
